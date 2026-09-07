@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[21:44, 07/09/2026] Tony: <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -29,27 +29,64 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    h2 {
+      margin-top: 0;
     }
 
     button {
       width: 100%;
-      padding: 12px;
+      padding: 14…
+[21:49, 07/09/2026] Tony: <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premier League Survivor</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f4f4;
+      color: #222;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin-top: 15px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
       margin-top: 10px;
       border: none;
       border-radius: 8px;
       font-size: 16px;
       cursor: pointer;
-    }
-
-    .login-button {
       background: #222;
       color: white;
     }
@@ -59,17 +96,21 @@
       color: #222;
     }
 
+    .success {
+      color: #16803c;
+    }
+
     .error {
       color: #b00020;
       white-space: pre-wrap;
     }
 
-    .success {
-      color: #16803c;
-    }
-
     #dashboard {
       display: none;
+    }
+
+    .menu-button {
+      text-align: left;
     }
   </style>
 </head>
@@ -88,17 +129,17 @@
         type="email"
         id="email"
         placeholder="Email address"
+        style="width:100%;box-sizing:border-box;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;font-size:16px;"
       >
 
       <input
         type="password"
         id="password"
         placeholder="Password"
+        style="width:100%;box-sizing:border-box;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;font-size:16px;"
       >
 
-      <button class="login-button" onclick="login()">
-        Login
-      </button>
+      <button onclick="login()">Login</button>
 
       <p id="login-status"></p>
     </div>
@@ -114,11 +155,42 @@
       <div class="card">
         <h2>Players</h2>
         <p id="players">Loading...</p>
+        <button class="menu-button" onclick="managePlayers()">
+          👥 Manage Players
+        </button>
       </div>
 
       <div class="card">
         <h2>Current Week</h2>
         <p id="week">Loading...</p>
+      </div>
+
+      <div class="card">
+        <h2>Admin Menu</h2>
+
+        <button class="menu-button" onclick="managePlayers()">
+          👥 Manage Players
+        </button>
+
+        <button class="menu-button" onclick="comingSoon('Weeks')">
+          📅 Manage Weeks
+        </button>
+
+        <button class="menu-button" onclick="comingSoon('Fixtures')">
+          ⚽ Manage Fixtures
+        </button>
+
+        <button class="menu-button" onclick="comingSoon('Selections')">
+          📝 Manage Selections
+        </button>
+
+        <button class="menu-button" onclick="comingSoon('Results')">
+          🏆 Enter Results
+        </button>
+
+        <button class="menu-button" onclick="comingSoon('Reports')">
+          📊 Weekly Reports
+        </button>
       </div>
 
       <div class="card">
@@ -141,16 +213,20 @@
     const SUPABASE_URL = "https://pkqzoxxjnzqaekhvnaku.supabase.co";
     const SUPABASE_KEY = "sb_publishable_KVbBNWyIhdykAQsUf_yvhA_rupOxGSR";
 
-    const supabaseClient = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
+    const supabaseClient =
+      window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 
     async function login() {
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const status = document.getElementById("login-status");
+      const email =
+        document.getElementById("email").value;
+
+      const password =
+        document.getElementById("password").value;
+
+      const status =
+        document.getElementById("login-status");
 
       status.textContent = "Logging in...";
       status.className = "";
@@ -162,24 +238,35 @@
         });
 
       if (error) {
-        status.textContent = "Login failed ❌\n" + error.message;
+
+        status.textContent =
+          "Login failed ❌\n" + error.message;
+
         status.className = "error";
+
         return;
       }
 
-      status.textContent = "Login successful ✅";
+      status.textContent =
+        "Login successful ✅";
+
       status.className = "success";
 
       showDashboard();
     }
 
+
     async function showDashboard() {
 
-      document.getElementById("login").style.display = "none";
-      document.getElementById("dashboard").style.display = "block";
+      document.getElementById("login").style.display =
+        "none";
+
+      document.getElementById("dashboard").style.display =
+        "block";
 
       await loadDashboard();
     }
+
 
     async function loadDashboard() {
 
@@ -188,41 +275,51 @@
 
       try {
 
-        const { data: competition, error: competitionError } =
+        const {
+          data: competition,
+          error: competitionError
+        } =
           await supabaseClient
             .from("competitions")
             .select("id,name,status")
             .eq("id", 1);
 
-        if (competitionError) {
+        if (competitionError)
           throw competitionError;
-        }
 
-        if (!competition || competition.length === 0) {
+        if (!competition || competition.length === 0)
           throw new Error("Competition not found.");
-        }
 
-        const { data: players, error: playersError } =
+
+        const {
+          data: players,
+          error: playersError
+        } =
           await supabaseClient
             .from("competition_players")
             .select("id")
             .eq("competition_id", 1);
 
-        if (playersError) {
+        if (playersError)
           throw playersError;
-        }
 
-        const { data: weeks, error: weeksError } =
+
+        const {
+          data: weeks,
+          error: weeksError
+        } =
           await supabaseClient
             .from("weeks")
             .select("week_number,status")
             .eq("competition_id", 1)
-            .order("week_number", { ascending: false })
+            .order("week_number", {
+              ascending: false
+            })
             .limit(1);
 
-        if (weeksError) {
+        if (weeksError)
           throw weeksError;
-        }
+
 
         document.getElementById("competition").textContent =
           competition[0].name +
@@ -230,8 +327,10 @@
           competition[0].status +
           ")";
 
+
         document.getElementById("players").textContent =
           players.length + " players";
+
 
         if (weeks.length > 0) {
 
@@ -248,10 +347,12 @@
             "No weeks found";
         }
 
+
         statusElement.textContent =
           "Connected to Supabase ✅";
 
-        statusElement.className = "success";
+        statusElement.className =
+          "success";
 
       } catch (error) {
 
@@ -259,30 +360,53 @@
           "Connection error ❌\n" +
           error.message;
 
-        statusElement.className = "error";
+        statusElement.className =
+          "error";
       }
     }
+
+
+    function managePlayers() {
+
+      alert(
+        "Player management is the next feature we will build."
+      );
+    }
+
+
+    function comingSoon(feature) {
+
+      alert(
+        feature +
+        " management will be added next."
+      );
+    }
+
 
     async function logout() {
 
       await supabaseClient.auth.signOut();
 
-      document.getElementById("dashboard").style.display = "none";
-      document.getElementById("login").style.display = "block";
+      document.getElementById("dashboard").style.display =
+        "none";
+
+      document.getElementById("login").style.display =
+        "block";
 
       document.getElementById("login-status").textContent =
         "Logged out.";
     }
+
 
     async function checkExistingLogin() {
 
       const { data } =
         await supabaseClient.auth.getSession();
 
-      if (data.session) {
+      if (data.session)
         showDashboard();
-      }
     }
+
 
     checkExistingLogin();
 
