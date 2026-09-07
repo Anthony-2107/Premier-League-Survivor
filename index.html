@@ -407,6 +407,43 @@
 }
 
 
+async function loadPlayers() {
+  const playerList = document.getElementById("player-list");
+
+  if (!playerList) return;
+
+  playerList.innerHTML = "Loading players...";
+
+  const { data, error } = await supabase
+    .from("players")
+    .select("id, name, whatsapp_number")
+    .order("name");
+
+  if (error) {
+    console.error("Error loading players:", error);
+    playerList.innerHTML =
+      "Could not load players: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    playerList.innerHTML = "No players found.";
+    return;
+  }
+
+  playerList.innerHTML = data
+    .map(player => `
+      <div style="padding:10px 0; border-bottom:1px solid #ddd;">
+        <strong>${player.name}</strong>
+        ${
+          player.whatsapp_number
+            ? <br><small>${player.whatsapp_number}</small>
+            : ""
+        }
+      </div>
+    `)
+    .join("");
+}
     function comingSoon(feature) {
 
       alert(
