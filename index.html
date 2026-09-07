@@ -366,12 +366,45 @@
     }
 
 
-    function managePlayers() {
+    async function managePlayers() {
+  const dashboard = document.getElementById("dashboard");
 
-      alert(
-        "Player management is the next feature we will build."
-      );
-    }
+  dashboard.innerHTML = `
+    <div class="card">
+      <h2>👥 Manage Players</h2>
+      <button onclick="location.reload()">← Back to Dashboard</button>
+    </div>
+
+    <div class="card">
+      <h3>Add Player</h3>
+
+      <input
+        id="new-player-name"
+        type="text"
+        placeholder="Player name"
+        style="width:100%; padding:10px; margin-bottom:10px;"
+      >
+
+      <input
+        id="new-player-whatsapp"
+        type="text"
+        placeholder="WhatsApp number (optional)"
+        style="width:100%; padding:10px; margin-bottom:10px;"
+      >
+
+      <button onclick="addPlayer()">Add Player</button>
+
+      <p id="player-management-status"></p>
+    </div>
+
+    <div class="card">
+      <h3>Current Players</h3>
+      <div id="player-list">Loading players...</div>
+    </div>
+  `;
+
+  await loadPlayers();
+}
 
 
     function comingSoon(feature) {
