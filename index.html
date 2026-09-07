@@ -1,3 +1,5 @@
+@@ -1,292 +1,416 @@
+<!DOCTYPE html>
 [21:44, 07/09/2026] Tony: <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,6 +31,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
+    input {
     h1 {
       margin-bottom: 5px;
     }
@@ -39,6 +42,12 @@
 
     button {
       width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
       padding: 14…
 [21:49, 07/09/2026] Tony: <!DOCTYPE html>
 <html lang="en">
@@ -81,12 +90,16 @@
 
     button {
       width: 100%;
+      padding: 12px;
       padding: 14px;
       margin-top: 10px;
       border: none;
       border-radius: 8px;
       font-size: 16px;
       cursor: pointer;
+    }
+
+    .login-button {
       background: #222;
       color: white;
     }
@@ -103,6 +116,10 @@
     .error {
       color: #b00020;
       white-space: pre-wrap;
+    }
+
+    .success {
+      color: #16803c;
     }
 
     #dashboard {
@@ -122,7 +139,7 @@
     <h1>🏆 Premier League Survivor</h1>
 
     <!-- LOGIN -->
-    <div id="login-card" class="card">
+    <div id="login" class="card">
       <h2>Admin Login</h2>
 
       <input
@@ -139,7 +156,10 @@
         style="width:100%;box-sizing:border-box;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;font-size:16px;"
       >
 
-      <button onclick="adminlogin()">Login</button>
+      <button class="login-button" onclick="login()">
+        Login
+      </button>
+      <button onclick="login()">Login</button>
 
       <p id="login-status"></p>
     </div>
@@ -213,12 +233,19 @@
     const SUPABASE_URL = "https://pkqzoxxjnzqaekhvnaku.supabase.co";
     const SUPABASE_KEY = "sb_publishable_KVbBNWyIhdykAQsUf_yvhA_rupOxGSR";
 
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
     const supabaseClient =
       window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-    async function adminLogin() {
+    async function login() {
 
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const status = document.getElementById("login-status");
       const email =
         document.getElementById("email").value;
 
@@ -238,6 +265,7 @@
         });
 
       if (error) {
+        status.textContent = "Login failed ❌\n" + error.message;
 
         status.textContent =
           "Login failed ❌\n" + error.message;
@@ -247,6 +275,7 @@
         return;
       }
 
+      status.textContent = "Login successful ✅";
       status.textContent =
         "Login successful ✅";
 
@@ -258,6 +287,8 @@
 
     async function showDashboard() {
 
+      document.getElementById("login").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
       document.getElementById("login").style.display =
         "none";
 
@@ -275,6 +306,7 @@
 
       try {
 
+        const { data: competition, error: competitionError } =
         const {
           data: competition,
           error: competitionError
@@ -284,12 +316,17 @@
             .select("id,name,status")
             .eq("id", 1);
 
+        if (competitionError) {
         if (competitionError)
           throw competitionError;
+        }
 
+        if (!competition || competition.length === 0) {
         if (!competition || competition.length === 0)
           throw new Error("Competition not found.");
+        }
 
+        const { data: players, error: playersError } =
 
         const {
           data: players,
@@ -300,9 +337,12 @@
             .select("id")
             .eq("competition_id", 1);
 
+        if (playersError) {
         if (playersError)
           throw playersError;
+        }
 
+        const { data: weeks, error: weeksError } =
 
         const {
           data: weeks,
@@ -312,13 +352,16 @@
             .from("weeks")
             .select("week_number,status")
             .eq("competition_id", 1)
+            .order("week_number", { ascending: false })
             .order("week_number", {
               ascending: false
             })
             .limit(1);
 
+        if (weeksError) {
         if (weeksError)
           throw weeksError;
+        }
 
 
         document.getElementById("competition").textContent =
@@ -351,6 +394,7 @@
         statusElement.textContent =
           "Connected to Supabase ✅";
 
+        statusElement.className = "success";
         statusElement.className =
           "success";
 
@@ -360,92 +404,21 @@
           "Connection error ❌\n" +
           error.message;
 
+        statusElement.className = "error";
         statusElement.className =
           "error";
       }
     }
 
 
-    async function managePlayers() {
-  const dashboard = document.getElementById("dashboard");
+    function managePlayers() {
 
-  dashboard.innerHTML = `
-    <div class="card">
-      <h2>👥 Manage Players</h2>
-      <button onclick="location.reload()">← Back to Dashboard</button>
-    </div>
-
-    <div class="card">
-      <h3>Add Player</h3>
-
-      <input
-        id="new-player-name"
-        type="text"
-        placeholder="Player name"
-        style="width:100%; padding:10px; margin-bottom:10px;"
-      >
-
-      <input
-        id="new-player-whatsapp"
-        type="text"
-        placeholder="WhatsApp number (optional)"
-        style="width:100%; padding:10px; margin-bottom:10px;"
-      >
-
-      <button onclick="addPlayer()">Add Player</button>
-
-      <p id="player-management-status"></p>
-    </div>
-
-    <div class="card">
-      <h3>Current Players</h3>
-      <div id="player-list">Loading players...</div>
-    </div>
-  `;
-
-  await loadPlayers();
-}
+      alert(
+        "Player management is the next feature we will build."
+      );
+    }
 
 
-async function loadPlayers() {
-  const playerList = document.getElementById("player-list");
-
-  if (!playerList) return;
-
-  playerList.innerHTML = "Loading players...";
-
-  const { data, error } = await supabase
-    .from("players")
-    .select("id, name, whatsapp_number")
-    .order("name");
-
-  if (error) {
-    console.error("Error loading players:", error);
-    playerList.innerHTML =
-      "Could not load players: " + error.message;
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    playerList.innerHTML = "No players found.";
-    return;
-  }
-
-  playerList.innerHTML = data
-    .map(player => `
-      <div style="padding:10px 0; border-bottom:1px solid #ddd;">
-        <strong>${player.name}</strong>
-        ${
-          player.whatsapp_number
-           ${player.whatsapp_number
-  ? <br><small>${player.whatsapp_number}</small>
-  : ""}
-            : ""
-        }
-      </div>
-    `)
-    .join("");
-}
     function comingSoon(feature) {
 
       alert(
@@ -459,6 +432,8 @@ async function loadPlayers() {
 
       await supabaseClient.auth.signOut();
 
+      document.getElementById("dashboard").style.display = "none";
+      document.getElementById("login").style.display = "block";
       document.getElementById("dashboard").style.display =
         "none";
 
@@ -475,8 +450,10 @@ async function loadPlayers() {
       const { data } =
         await supabaseClient.auth.getSession();
 
+      if (data.session) {
       if (data.session)
         showDashboard();
+      }
     }
 
 
