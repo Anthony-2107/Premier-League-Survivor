@@ -411,14 +411,92 @@
     }
 
 
-    function managePlayers() {
+    async function managePlayers() {
+  const dashboard = document.getElementById("dashboard");
 
-      alert(
-        "Player management is the next feature we will build."
-      );
+  dashboard.innerHTML = `
+    <div class="card">
+      <h2>👥 Manage Players</h2>
+      <button onclick="location.reload()">← Back to Dashboard</button>
+    </div>
+
+    <div class="card">
+      <h3>Add Player</h3>
+
+      <input
+        id="new-player-name"
+        type="text"
+        placeholder="Player name"
+        style="width:100%; padding:10px; margin-bottom:10px;"
+      >
+
+      <input
+        id="new-player-whatsapp"
+        type="text"
+        placeholder="WhatsApp number (optional)"
+        style="width:100%; padding:10px; margin-bottom:10px;"
+      >
+
+      <button onclick="addPlayer()">Add Player</button>
+
+      <p id="player-management-status"></p>
+    </div>
+
+    <div class="card">
+      <h3>Current Players</h3>
+      <div id="player-list">Loading players...</div>
+    </div>
+  `;
+
+  await loadPlayers();
+}
+
+
+async function loadPlayers() {
+  const playerList = document.getElementById("player-list");
+
+  if (!playerList) return;
+
+  playerList.textContent = "Loading players...";
+
+  const { data, error } = await supabase
+    .from("players")
+    .select("id, name, whatsapp_number")
+    .order("name");
+
+  if (error) {
+    console.error("Error loading players:", error);
+    playerList.textContent = "Could not load players: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    playerList.textContent = "No players found.";
+    return;
+  }
+
+  playerList.innerHTML = "";
+
+  data.forEach(player => {
+    const div = document.createElement("div");
+    div.style.padding = "10px 0";
+    div.style.borderBottom = "1px solid #ddd";
+
+    const strong = document.createElement("strong");
+    strong.textContent = player.name;
+    div.appendChild(strong);
+
+    if (player.whatsapp_number) {
+      const br = document.createElement("br");
+      const small = document.createElement("small");
+      small.textContent = player.whatsapp_number;
+      div.appendChild(br);
+      div.appendChild(small);
     }
 
-
+    playerList.appendChild(div);
+  });
+}   
     function comingSoon(feature) {
 
       alert(
